@@ -105,8 +105,8 @@ namespace KinematicCharacterController
         /// </summary>
         public Vector3 TransientPosition
         {
-            get { return _internalTransientPosition; }
-            private set { _internalTransientPosition = value; }
+            get => _internalTransientPosition;
+            private set => _internalTransientPosition = value;
         }
 
         private Quaternion _internalTransientRotation;
@@ -116,8 +116,8 @@ namespace KinematicCharacterController
         /// </summary>
         public Quaternion TransientRotation
         {
-            get { return _internalTransientRotation; }
-            private set { _internalTransientRotation = value; }
+            get => _internalTransientRotation;
+            private set => _internalTransientRotation = value;
         }
 
         private void Reset()
@@ -157,7 +157,7 @@ namespace KinematicCharacterController
 
         private void Awake()
         {
-            Transform = this.transform;
+            Transform = transform;
             ValidateData();
 
             TransientPosition = Rigidbody.position;
@@ -241,11 +241,19 @@ namespace KinematicCharacterController
 
             if (deltaTime > 0f)
             {
+                // Linear velocity
                 Velocity = (TransientPosition - InitialSimulationPosition) / deltaTime;
 
-                Quaternion rotationFromCurrentToGoal =
-                    TransientRotation * Quaternion.Inverse(InitialSimulationRotation);
-                AngularVelocity = (Mathf.Deg2Rad * rotationFromCurrentToGoal.eulerAngles) / deltaTime;
+                /*
+                 * If you are trying to get the difference C between two quaternions A and B, such that A + C = B and
+                 * B - C = A, the correct formula is:
+                 * 1. To = From * Diff;
+                 * 2. Diff = To * Quaternion.Inverse(From);
+                 * 3. From = To * Quaternion.Inverse(Diff);
+                 */
+
+                var rotationFromCurrentToGoal = TransientRotation * Quaternion.Inverse(InitialSimulationRotation);
+                AngularVelocity = Mathf.Deg2Rad * rotationFromCurrentToGoal.eulerAngles / deltaTime;
             }
         }
     }
