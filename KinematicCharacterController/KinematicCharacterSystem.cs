@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace KinematicCharacterController
@@ -13,8 +11,8 @@ namespace KinematicCharacterController
     {
         private static KinematicCharacterSystem _instance;
 
-        public static List<KinematicCharacterMotor> CharacterMotors = new List<KinematicCharacterMotor>();
-        public static List<PhysicsMover> PhysicsMovers = new List<PhysicsMover>();
+        public static List<KinematicCharacterMotor> CharacterMotors = new();
+        public static List<PhysicsMover> PhysicsMovers = new();
 
         private static float _lastCustomInterpolationStartTime = -1f;
         private static float _lastCustomInterpolationDeltaTime = -1f;
@@ -36,7 +34,7 @@ namespace KinematicCharacterController
 
                 Settings = ScriptableObject.CreateInstance<KCCSettings>();
 
-                GameObject.DontDestroyOnLoad(systemGameObject);
+                DontDestroyOnLoad(systemGameObject);
             }
         }
 
@@ -52,13 +50,13 @@ namespace KinematicCharacterController
         /// <summary>
         /// Sets the maximum capacity of the character motors list, to prevent allocations when adding characters
         /// </summary>
-        /// <param name="capacity"></param>
         public static void SetCharacterMotorsCapacity(int capacity)
         {
             if (capacity < CharacterMotors.Count)
             {
                 capacity = CharacterMotors.Count;
             }
+
             CharacterMotors.Capacity = capacity;
         }
 
@@ -81,13 +79,13 @@ namespace KinematicCharacterController
         /// <summary>
         /// Sets the maximum capacity of the physics movers list, to prevent allocations when adding movers
         /// </summary>
-        /// <param name="capacity"></param>
         public static void SetPhysicsMoversCapacity(int capacity)
         {
             if (capacity < PhysicsMovers.Count)
             {
                 capacity = PhysicsMovers.Count;
             }
+
             PhysicsMovers.Capacity = capacity;
         }
 
@@ -109,10 +107,10 @@ namespace KinematicCharacterController
             PhysicsMovers.Remove(mover);
         }
 
-        // This is to prevent duplicating the singleton gameobject on script recompiles
+        // This is to prevent duplicating the singleton game object on script recompile
         private void OnDisable()
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
 
         private void Awake()
@@ -261,7 +259,8 @@ namespace KinematicCharacterController
         /// </summary>
         private static void CustomInterpolationUpdate()
         {
-            float interpolationFactor = Mathf.Clamp01((Time.time - _lastCustomInterpolationStartTime) / _lastCustomInterpolationDeltaTime);
+            float interpolationFactor =
+                Mathf.Clamp01((Time.time - _lastCustomInterpolationStartTime) / _lastCustomInterpolationDeltaTime);
 
             // Handle characters interpolation
             for (int i = 0; i < CharacterMotors.Count; i++)
@@ -277,7 +276,7 @@ namespace KinematicCharacterController
             for (int i = 0; i < PhysicsMovers.Count; i++)
             {
                 PhysicsMover mover = PhysicsMovers[i];
-                
+
                 mover.Transform.SetPositionAndRotation(
                     Vector3.Lerp(mover.InitialTickPosition, mover.TransientPosition, interpolationFactor),
                     Quaternion.Slerp(mover.InitialTickRotation, mover.TransientRotation, interpolationFactor));

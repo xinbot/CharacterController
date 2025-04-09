@@ -7,7 +7,7 @@ namespace KinematicCharacterController
     /// Represents the entire state of a PhysicsMover that is pertinent for simulation.
     /// Use this to save state or revert to past state
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public struct PhysicsMoverState
     {
         public Vector3 Position;
@@ -119,7 +119,7 @@ namespace KinematicCharacterController
             get { return _internalTransientRotation; }
             private set { _internalTransientRotation = value; }
         }
-        
+
         private void Reset()
         {
             ValidateData();
@@ -230,7 +230,7 @@ namespace KinematicCharacterController
         }
 
         /// <summary>
-        /// Caches velocity values based on deltatime and target position/rotations
+        /// Caches velocity values based on delta time and target position/rotations
         /// </summary>
         public void VelocityUpdate(float deltaTime)
         {
@@ -244,7 +244,7 @@ namespace KinematicCharacterController
                 Velocity = (TransientPosition - InitialSimulationPosition) / deltaTime;
 
                 Quaternion rotationFromCurrentToGoal =
-                    TransientRotation * (Quaternion.Inverse(InitialSimulationRotation));
+                    TransientRotation * Quaternion.Inverse(InitialSimulationRotation);
                 AngularVelocity = (Mathf.Deg2Rad * rotationFromCurrentToGoal.eulerAngles) / deltaTime;
             }
         }
