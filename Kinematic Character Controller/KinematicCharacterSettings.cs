@@ -3,7 +3,7 @@
 namespace KinematicCharacterController
 {
     [CreateAssetMenu]
-    public class KCCSettings : ScriptableObject
+    public class KinematicCharacterSettings : ScriptableObject
     {
         /// <summary>
         /// Determines if the system simulates automatically. If true, the simulation is done on FixedUpdate

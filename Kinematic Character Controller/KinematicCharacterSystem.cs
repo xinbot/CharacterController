@@ -17,7 +17,7 @@ namespace KinematicCharacterController
         private static float _lastCustomInterpolationStartTime = -1f;
         private static float _lastCustomInterpolationDeltaTime = -1f;
 
-        public static KCCSettings Settings;
+        public static KinematicCharacterSettings Settings;
 
         /// <summary>
         /// Creates a KinematicCharacterSystem instance if there isn't already one
@@ -32,7 +32,7 @@ namespace KinematicCharacterController
                 systemGameObject.hideFlags = HideFlags.NotEditable;
                 _instance.hideFlags = HideFlags.NotEditable;
 
-                Settings = ScriptableObject.CreateInstance<KCCSettings>();
+                Settings = ScriptableObject.CreateInstance<KinematicCharacterSettings>();
 
                 DontDestroyOnLoad(systemGameObject);
             }
