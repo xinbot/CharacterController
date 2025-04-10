@@ -4,151 +4,6 @@ using UnityEngine;
 
 namespace KinematicCharacterController
 {
-    public enum RigidbodyInteractionType
-    {
-        None,
-        Kinematic,
-        SimulatedDynamic
-    }
-
-    public enum StepHandlingMethod
-    {
-        None,
-        Standard,
-        Extra
-    }
-
-    public enum MovementSweepState
-    {
-        Initial,
-        AfterFirstHit,
-        FoundBlockingCrease,
-        FoundBlockingCorner,
-    }
-
-    /// <summary>
-    /// Represents the entire state of a character motor that is pertinent for simulation.
-    /// Use this to save state or revert to past state
-    /// </summary>
-    [Serializable]
-    public struct KinematicCharacterMotorState
-    {
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public Vector3 BaseVelocity;
-
-        public bool MustUnground;
-        public float MustUngroundTime;
-        public bool LastMovementIterationFoundAnyGround;
-        public CharacterTransientGroundingReport GroundingStatus;
-
-        public Rigidbody AttachedRigidbody;
-        public Vector3 AttachedRigidbodyVelocity;
-    }
-
-    /// <summary>
-    /// Describes an overlap between the character capsule and another collider
-    /// </summary>
-    public struct OverlapResult
-    {
-        public Vector3 Normal;
-        public Collider Collider;
-
-        public OverlapResult(Vector3 normal, Collider collider)
-        {
-            Normal = normal;
-            Collider = collider;
-        }
-    }
-
-    /// <summary>
-    /// Contains all the information for the motor's grounding status
-    /// </summary>
-    public struct CharacterGroundingReport
-    {
-        public bool FoundAnyGround;
-        public bool IsStableOnGround;
-        public bool SnappingPrevented;
-        public Vector3 GroundNormal;
-        public Vector3 InnerGroundNormal;
-        public Vector3 OuterGroundNormal;
-
-        public Collider GroundCollider;
-        public Vector3 GroundPoint;
-
-        public void CopyFrom(CharacterTransientGroundingReport transientGroundingReport)
-        {
-            FoundAnyGround = transientGroundingReport.FoundAnyGround;
-            IsStableOnGround = transientGroundingReport.IsStableOnGround;
-            SnappingPrevented = transientGroundingReport.SnappingPrevented;
-            GroundNormal = transientGroundingReport.GroundNormal;
-            InnerGroundNormal = transientGroundingReport.InnerGroundNormal;
-            OuterGroundNormal = transientGroundingReport.OuterGroundNormal;
-
-            GroundCollider = null;
-            GroundPoint = Vector3.zero;
-        }
-    }
-
-    /// <summary>
-    /// Contains the simulation-relevant information for the motor's grounding status
-    /// </summary>
-    public struct CharacterTransientGroundingReport
-    {
-        public bool FoundAnyGround;
-        public bool IsStableOnGround;
-        public bool SnappingPrevented;
-        public Vector3 GroundNormal;
-        public Vector3 InnerGroundNormal;
-        public Vector3 OuterGroundNormal;
-
-        public void CopyFrom(CharacterGroundingReport groundingReport)
-        {
-            FoundAnyGround = groundingReport.FoundAnyGround;
-            IsStableOnGround = groundingReport.IsStableOnGround;
-            SnappingPrevented = groundingReport.SnappingPrevented;
-            GroundNormal = groundingReport.GroundNormal;
-            InnerGroundNormal = groundingReport.InnerGroundNormal;
-            OuterGroundNormal = groundingReport.OuterGroundNormal;
-        }
-    }
-
-    /// <summary>
-    /// Contains all the information from a hit stability evaluation
-    /// </summary>
-    public struct HitStabilityReport
-    {
-        public bool IsStable;
-
-        public bool FoundInnerNormal;
-        public Vector3 InnerNormal;
-        public bool FoundOuterNormal;
-        public Vector3 OuterNormal;
-
-        public bool ValidStepDetected;
-        public Collider SteppedCollider;
-
-        public bool LedgeDetected;
-        public bool IsOnEmptySideOfLedge;
-        public float DistanceFromLedge;
-        public bool IsMovingTowardsEmptySideOfLedge;
-        public Vector3 LedgeGroundNormal;
-        public Vector3 LedgeRightDirection;
-        public Vector3 LedgeFacingDirection;
-    }
-
-    /// <summary>
-    /// Contains the information of hit rigidbodies during the movement phase, so they can be processed afterwards
-    /// </summary>
-    public struct RigidbodyProjectionHit
-    {
-        public Rigidbody Rigidbody;
-        public Vector3 HitPoint;
-        public Vector3 EffectiveHitNormal;
-        public Vector3 HitVelocity;
-        public bool StableOnHit;
-    }
-
     /// <summary>
     /// Component that manages character collisions and movement solving
     /// </summary>
@@ -523,7 +378,7 @@ namespace KinematicCharacterController
         /// </summary>
         public Quaternion TransientRotation
         {
-            get { return _transientRotation; }
+            get => _transientRotation;
             private set
             {
                 _transientRotation = value;
@@ -536,10 +391,7 @@ namespace KinematicCharacterController
         /// <summary>
         /// The character's total velocity, including velocity from standing on rigidbodies or PhysicsMover
         /// </summary>
-        public Vector3 Velocity
-        {
-            get { return BaseVelocity + _attachedRigidbodyVelocity; }
-        }
+        public Vector3 Velocity => BaseVelocity + _attachedRigidbodyVelocity;
 
         // Warning: Don't touch these constants unless you know exactly what you're doing!
         public const int MaxHitsBudget = 16;
@@ -815,12 +667,15 @@ namespace KinematicCharacterController
         public void UpdatePhase1(float deltaTime)
         {
             // NaN propagation safety stop
-            if (float.IsNaN(BaseVelocity.x) || float.IsNaN(BaseVelocity.y) || float.IsNaN(BaseVelocity.z))
+            if (float.IsNaN(BaseVelocity.x) ||
+                float.IsNaN(BaseVelocity.y) ||
+                float.IsNaN(BaseVelocity.z))
             {
                 BaseVelocity = Vector3.zero;
             }
 
-            if (float.IsNaN(_attachedRigidbodyVelocity.x) || float.IsNaN(_attachedRigidbodyVelocity.y) ||
+            if (float.IsNaN(_attachedRigidbodyVelocity.x) ||
+                float.IsNaN(_attachedRigidbodyVelocity.y) ||
                 float.IsNaN(_attachedRigidbodyVelocity.z))
             {
                 _attachedRigidbodyVelocity = Vector3.zero;
@@ -828,11 +683,11 @@ namespace KinematicCharacterController
 
 #if UNITY_EDITOR
             if (!Mathf.Approximately(_transform.lossyScale.x, 1f) ||
-                !Mathf.Approximately(_transform.lossyScale.y, 1f) || !Mathf.Approximately(_transform.lossyScale.z, 1f))
+                !Mathf.Approximately(_transform.lossyScale.y, 1f) ||
+                !Mathf.Approximately(_transform.lossyScale.z, 1f))
             {
-                Debug.LogError(
-                    "Character's lossy scale is not (1,1,1). This is not allowed. Make sure the character's transform and all of its parents have a (1,1,1) scale.",
-                    this.gameObject);
+                Debug.LogError("Character's lossy scale is not (1,1,1). This is not allowed. Make sure the " +
+                               "character's transform and all of its parents have a (1,1,1) scale.", gameObject);
             }
 #endif
 
@@ -2465,10 +2320,13 @@ namespace KinematicCharacterController
                         interactiveRigidbody.transform.TransformPoint(interactiveRigidbody.centerOfMass);
 
                     Vector3 centerOfRotationToPoint = atPoint - centerOfRotation;
+
                     Quaternion rotationFromInteractiveRigidbody =
                         Quaternion.Euler(Mathf.Rad2Deg * angularVelocity * deltaTime);
+
                     Vector3 finalPointPosition =
                         centerOfRotation + (rotationFromInteractiveRigidbody * centerOfRotationToPoint);
+
                     linearVelocity += (finalPointPosition - atPoint) / deltaTime;
                 }
             }
