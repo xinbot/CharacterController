@@ -964,14 +964,8 @@ namespace KinematicCharacterController
                     if (_attachedRigidbody)
                     {
                         float upwardsOffset = Capsule.radius;
-
-                        RaycastHit closestHit;
-                        if (CharacterGroundSweep(
-                            _transientPosition + (_characterUp * upwardsOffset),
-                            _transientRotation,
-                            -_characterUp,
-                            upwardsOffset,
-                            out closestHit))
+                        if (CharacterGroundSweep(_transientPosition + (_characterUp * upwardsOffset),
+                            _transientRotation, -_characterUp, upwardsOffset, out var closestHit))
                         {
                             if (closestHit.collider.attachedRigidbody == _attachedRigidbody &&
                                 IsStableOnNormal(closestHit.normal))
@@ -990,88 +984,77 @@ namespace KinematicCharacterController
                 {
                     #region Resolve overlaps that could've been caused by rotation or physics movers simulation pushing the character
 
-                    Vector3 resolutionDirection = _cachedWorldUp;
-                    float resolutionDistance = 0f;
                     int iterationsMade = 0;
-                    bool overlapSolved = false;
-                    while (iterationsMade < MaxDecollisionIterations && !overlapSolved)
+                    while (iterationsMade < MaxDecollisionIterations)
                     {
                         int nbOverlaps = CharacterCollisionsOverlap(_transientPosition, _transientRotation,
                             _internalProbedColliders);
-                        if (nbOverlaps > 0)
+                        if (nbOverlaps <= 0)
                         {
-                            for (int i = 0; i < nbOverlaps; i++)
+                            break;
+                        }
+
+                        for (int i = 0; i < nbOverlaps; i++)
+                        {
+                            // Process overlap
+                            Transform overlappedTransform = _internalProbedColliders[i].GetComponent<Transform>();
+                            if (Physics.ComputePenetration(
+                                Capsule,
+                                _transientPosition,
+                                _transientRotation,
+                                _internalProbedColliders[i],
+                                overlappedTransform.position,
+                                overlappedTransform.rotation,
+                                out var resolutionDirection,
+                                out var resolutionDistance))
                             {
-                                // Process overlap
-                                Transform overlappedTransform = _internalProbedColliders[i].GetComponent<Transform>();
-                                if (Physics.ComputePenetration(
-                                    Capsule,
-                                    _transientPosition,
-                                    _transientRotation,
-                                    _internalProbedColliders[i],
-                                    overlappedTransform.position,
-                                    overlappedTransform.rotation,
-                                    out resolutionDirection,
-                                    out resolutionDistance))
+                                // Resolve along obstruction direction
+                                HitStabilityReport mockReport = new HitStabilityReport();
+                                mockReport.IsStable = IsStableOnNormal(resolutionDirection);
+                                resolutionDirection =
+                                    GetObstructionNormal(resolutionDirection, mockReport.IsStable);
+
+                                // Solve overlap
+                                Vector3 resolutionMovement =
+                                    resolutionDirection * (resolutionDistance + CollisionOffset);
+                                _transientPosition += resolutionMovement;
+
+                                // If interactiveRigidbody, register as rigidbody hit for velocity
+                                if (InteractiveRigidbodyHandling)
                                 {
-                                    // Resolve along obstruction direction
-                                    HitStabilityReport mockReport = new HitStabilityReport();
-                                    mockReport.IsStable = IsStableOnNormal(resolutionDirection);
-                                    resolutionDirection =
-                                        GetObstructionNormal(resolutionDirection, mockReport.IsStable);
-
-                                    // Solve overlap
-                                    Vector3 resolutionMovement =
-                                        resolutionDirection * (resolutionDistance + CollisionOffset);
-                                    _transientPosition += resolutionMovement;
-
-                                    // If interactiveRigidbody, register as rigidbody hit for velocity
-                                    if (InteractiveRigidbodyHandling)
+                                    var probedRigidbody = GetInteractiveRigidbody(_internalProbedColliders[i]);
+                                    if (probedRigidbody)
                                     {
-                                        Rigidbody probedRigidbody =
-                                            GetInteractiveRigidbody(_internalProbedColliders[i]);
-                                        if (probedRigidbody != null)
+                                        HitStabilityReport tmpReport = new HitStabilityReport();
+                                        tmpReport.IsStable = IsStableOnNormal(resolutionDirection);
+                                        if (tmpReport.IsStable)
                                         {
-                                            HitStabilityReport tmpReport = new HitStabilityReport();
-                                            tmpReport.IsStable = IsStableOnNormal(resolutionDirection);
-                                            if (tmpReport.IsStable)
-                                            {
-                                                LastMovementIterationFoundAnyGround = tmpReport.IsStable;
-                                            }
+                                            LastMovementIterationFoundAnyGround = true;
+                                        }
 
-                                            if (probedRigidbody != _attachedRigidbody)
-                                            {
-                                                Vector3 characterCenter = _transientPosition +
-                                                                          (_transientRotation *
-                                                                           _characterTransformToCapsuleCenter);
-                                                Vector3 estimatedCollisionPoint = _transientPosition;
+                                        if (probedRigidbody != _attachedRigidbody)
+                                        {
+                                            Vector3 characterCenter = _transientPosition +
+                                                                      (_transientRotation *
+                                                                       _characterTransformToCapsuleCenter);
+                                            Vector3 estimatedCollisionPoint = _transientPosition;
 
-
-                                                StoreRigidbodyHit(
-                                                    probedRigidbody,
-                                                    Velocity,
-                                                    estimatedCollisionPoint,
-                                                    resolutionDirection,
-                                                    tmpReport);
-                                            }
+                                            StoreRigidbodyHit(probedRigidbody, Velocity, estimatedCollisionPoint,
+                                                resolutionDirection, tmpReport);
                                         }
                                     }
-
-                                    // Remember overlaps
-                                    if (_overlapsCount < _overlaps.Length)
-                                    {
-                                        _overlaps[_overlapsCount] = new OverlapResult(resolutionDirection,
-                                            _internalProbedColliders[i]);
-                                        _overlapsCount++;
-                                    }
-
-                                    break;
                                 }
+
+                                // Remember overlaps
+                                if (_overlapsCount < _overlaps.Length)
+                                {
+                                    _overlaps[_overlapsCount] = new OverlapResult(resolutionDirection,
+                                        _internalProbedColliders[i]);
+                                    _overlapsCount++;
+                                }
+
+                                break;
                             }
-                        }
-                        else
-                        {
-                            overlapSolved = true;
                         }
 
                         iterationsMade++;
@@ -1083,8 +1066,6 @@ namespace KinematicCharacterController
 
             // Handle velocity
             CharacterController.UpdateVelocity(ref BaseVelocity, deltaTime);
-
-            //this.CharacterController.UpdateVelocity(ref BaseVelocity, deltaTime);
             if (BaseVelocity.magnitude < MinVelocityMagnitude)
             {
                 BaseVelocity = Vector3.zero;
@@ -1113,7 +1094,6 @@ namespace KinematicCharacterController
 
             #endregion
 
-            // Handle planar constraint
             if (HasPlanarConstraint)
             {
                 _transientPosition = _initialSimulationPosition +
@@ -1121,7 +1101,6 @@ namespace KinematicCharacterController
                                          PlanarConstraintAxis.normalized);
             }
 
-            // Discrete collision detection
             if (DiscreteCollisionEvents)
             {
                 int nbOverlaps = CharacterCollisionsOverlap(_transientPosition, _transientRotation,
