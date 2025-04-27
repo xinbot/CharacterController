@@ -429,7 +429,7 @@ namespace KinematicCharacterController
         /// <summary>
         /// Handle validating all required values
         /// </summary>
-        public void ValidateData()
+        private void ValidateData()
         {
             Capsule = GetComponent<CapsuleCollider>();
             CapsuleRadius = Mathf.Clamp(CapsuleRadius, 0f, CapsuleHeight * 0.5f);
@@ -631,13 +631,12 @@ namespace KinematicCharacterController
             _transientPosition = _transform.position;
             TransientRotation = _transform.rotation;
 
-            // Build Collidable Layers mask
             CollidableLayers = 0;
             for (int i = 0; i < 32; i++)
             {
-                if (!Physics.GetIgnoreLayerCollision(this.gameObject.layer, i))
+                if (!Physics.GetIgnoreLayerCollision(gameObject.layer, i))
                 {
-                    CollidableLayers |= (1 << i);
+                    CollidableLayers |= 1 << i;
                 }
             }
 
@@ -1289,21 +1288,18 @@ namespace KinematicCharacterController
         private bool InternalCharacterMove(ref Vector3 transientVelocity, float deltaTime)
         {
             if (deltaTime <= 0f)
+            {
                 return false;
+            }
 
-            // Planar constraint
             if (HasPlanarConstraint)
             {
                 transientVelocity = Vector3.ProjectOnPlane(transientVelocity, PlanarConstraintAxis.normalized);
             }
 
-            bool wasCompleted = true;
             Vector3 remainingMovementDirection = transientVelocity.normalized;
             float remainingMovementMagnitude = transientVelocity.magnitude * deltaTime;
-            Vector3 originalVelocityDirection = remainingMovementDirection;
-            int sweepsMade = 0;
-            bool hitSomethingThisSweepIteration = true;
-            Vector3 tmpMovedPosition = _transientPosition;
+
             bool previousHitIsStable = false;
             Vector3 previousVelocity = _cachedZeroVector;
             Vector3 previousObstructionNormal = _cachedZeroVector;
@@ -1321,9 +1317,7 @@ namespace KinematicCharacterController
 
                     InternalHandleVelocityProjection(
                         stableOnHit,
-                        overlapNormal,
                         obstructionNormal,
-                        originalVelocityDirection,
                         ref sweepState,
                         previousHitIsStable,
                         previousVelocity,
@@ -1338,9 +1332,13 @@ namespace KinematicCharacterController
                 }
             }
 
+            bool wasCompleted = true;
+            int sweepsMade = 0;
+            bool hitSomethingThisSweepIteration = true;
+            Vector3 tmpMovedPosition = _transientPosition;
+
             // Sweep the desired movement to detect collisions
-            while (remainingMovementMagnitude > 0f &&
-                   (sweepsMade <= MaxMovementIterations) &&
+            while (remainingMovementMagnitude > 0f && sweepsMade <= MaxMovementIterations &&
                    hitSomethingThisSweepIteration)
             {
                 bool foundClosestHit = false;
@@ -1497,9 +1495,7 @@ namespace KinematicCharacterController
                         // Project velocity for next iteration
                         InternalHandleVelocityProjection(
                             stableOnHit,
-                            closestSweepHitNormal,
                             obstructionNormal,
-                            originalVelocityDirection,
                             ref sweepState,
                             previousHitIsStable,
                             previousVelocity,
@@ -1593,10 +1589,10 @@ namespace KinematicCharacterController
         /// <summary>
         /// Processes movement projection upon detecting a hit
         /// </summary>
-        private void InternalHandleVelocityProjection(bool stableOnHit, Vector3 hitNormal, Vector3 obstructionNormal,
-            Vector3 originalDirection, ref MovementSweepState sweepState, bool previousHitIsStable,
-            Vector3 previousVelocity, Vector3 previousObstructionNormal, ref Vector3 transientVelocity,
-            ref float remainingMovementMagnitude, ref Vector3 remainingMovementDirection)
+        private void InternalHandleVelocityProjection(bool stableOnHit, Vector3 obstructionNormal,
+            ref MovementSweepState sweepState, bool previousHitIsStable, Vector3 previousVelocity,
+            Vector3 previousObstructionNormal, ref Vector3 transientVelocity, ref float remainingMovementMagnitude,
+            ref Vector3 remainingMovementDirection)
         {
             if (transientVelocity.sqrMagnitude <= 0f)
             {
@@ -1608,29 +1604,25 @@ namespace KinematicCharacterController
             if (stableOnHit)
             {
                 LastMovementIterationFoundAnyGround = true;
-                HandleVelocityProjection(ref transientVelocity, obstructionNormal, stableOnHit);
+                HandleVelocityProjection(ref transientVelocity, obstructionNormal, true);
             }
             else
             {
                 // Handle projection
                 if (sweepState == MovementSweepState.Initial)
                 {
-                    HandleVelocityProjection(ref transientVelocity, obstructionNormal, stableOnHit);
+                    HandleVelocityProjection(ref transientVelocity, obstructionNormal, false);
                     sweepState = MovementSweepState.AfterFirstHit;
                 }
                 // Blocking crease handling
                 else if (sweepState == MovementSweepState.AfterFirstHit)
                 {
-                    EvaluateCrease(
-                        transientVelocity,
-                        previousVelocity,
-                        obstructionNormal,
-                        previousObstructionNormal,
-                        stableOnHit,
+                    EvaluateCrease(transientVelocity, previousVelocity,
+                        obstructionNormal, previousObstructionNormal,
+                        false,
                         previousHitIsStable,
                         GroundingStatus.IsStableOnGround && !MustUnground(),
-                        out bool foundCrease,
-                        out Vector3 creaseDirection);
+                        out bool foundCrease, out Vector3 creaseDirection);
 
                     if (foundCrease)
                     {
@@ -1647,7 +1639,7 @@ namespace KinematicCharacterController
                     }
                     else
                     {
-                        HandleVelocityProjection(ref transientVelocity, obstructionNormal, stableOnHit);
+                        HandleVelocityProjection(ref transientVelocity, obstructionNormal, false);
                     }
                 }
                 // Blocking corner handling
@@ -1720,7 +1712,8 @@ namespace KinematicCharacterController
         /// <summary>
         /// Allows you to override the way velocity is projected on an obstruction
         /// </summary>
-        public virtual void HandleVelocityProjection(ref Vector3 velocity, Vector3 obstructionNormal, bool stableOnHit)
+        protected virtual void HandleVelocityProjection(ref Vector3 velocity, Vector3 obstructionNormal,
+            bool stableOnHit)
         {
             if (GroundingStatus.IsStableOnGround && !MustUnground())
             {
@@ -1760,7 +1753,7 @@ namespace KinematicCharacterController
         /// Allows you to override the way hit rigidbodies are pushed / interacted with. 
         /// ProcessedVelocity is what must be modified if this interaction affects the character's velocity.
         /// </summary>
-        public virtual void HandleSimulatedRigidbodyInteraction(ref Vector3 processedVelocity,
+        protected virtual void HandleSimulatedRigidbodyInteraction(ref Vector3 processedVelocity,
             RigidbodyProjectionHit hit, float deltaTime)
         {
         }
@@ -1807,7 +1800,7 @@ namespace KinematicCharacterController
                         }
 
                         // Calculate the ratio of the total mass that the character mass represents
-                        float characterToBodyMassRatio = 1f;
+                        float characterToBodyMassRatio;
                         {
                             if (characterMass + hitBodyMassAtPoint > 0f)
                             {
@@ -2062,7 +2055,7 @@ namespace KinematicCharacterController
         private void DetectSteps(Vector3 characterPosition, Quaternion characterRotation, Vector3 hitPoint,
             Vector3 innerHitDirection, ref HitStabilityReport stabilityReport)
         {
-            int nbStepHits = 0;
+            int nbStepHits;
             Collider tmpCollider;
             RaycastHit outerStepHit;
             Vector3 characterUp = characterRotation * _cachedWorldUp;
@@ -2329,7 +2322,7 @@ namespace KinematicCharacterController
         /// <summary>
         /// Trims a vector to make it restricted against a plane 
         /// </summary>
-        private void RestrictVectorToPlane(ref Vector3 vector, Vector3 toPlane)
+        public void RestrictVectorToPlane(ref Vector3 vector, Vector3 toPlane)
         {
             if (vector.x > 0 != toPlane.x > 0)
             {
@@ -2368,12 +2361,11 @@ namespace KinematicCharacterController
                 top += (rotation * Vector3.up * inflate);
             }
 
-            int nbHits;
-            int nbUnfilteredHits = Physics.OverlapCapsuleNonAlloc(bottom, top, Capsule.radius + inflate,
+            var nbUnfilteredHits = Physics.OverlapCapsuleNonAlloc(bottom, top, Capsule.radius + inflate,
                 overlappedColliders, queryLayers, QueryTriggerInteraction.Ignore);
 
-            nbHits = nbUnfilteredHits;
-            for (int i = nbUnfilteredHits - 1; i >= 0; i--)
+            var nbHits = nbUnfilteredHits;
+            for (var i = nbUnfilteredHits - 1; i >= 0; i--)
             {
                 if (!CheckIfColliderValidForCollisions(overlappedColliders[i]))
                 {
@@ -2403,14 +2395,13 @@ namespace KinematicCharacterController
                 top += (rotation * Vector3.up * inflate);
             }
 
-            int nbHits;
-            int nbUnfilteredHits = Physics.OverlapCapsuleNonAlloc(bottom, top, Capsule.radius + inflate,
+            var nbUnfilteredHits = Physics.OverlapCapsuleNonAlloc(bottom, top, Capsule.radius + inflate,
                 overlappedColliders, layers, triggerInteraction);
 
-            // Filter out the character capsule itself
-            nbHits = nbUnfilteredHits;
+            var nbHits = nbUnfilteredHits;
             for (int i = nbUnfilteredHits - 1; i >= 0; i--)
             {
+                // Filter out the character capsule itself
                 if (overlappedColliders[i] == Capsule)
                 {
                     nbHits--;
@@ -2447,7 +2438,7 @@ namespace KinematicCharacterController
                 top += (rotation * Vector3.up * inflate);
             }
 
-            int nbHits = 0;
+            int nbHits;
             int nbUnfilteredHits = Physics.CapsuleCastNonAlloc(bottom, top, Capsule.radius + inflate,
                 direction, hits, distance + SweepProbingBackstepDistance, queryLayers, QueryTriggerInteraction.Ignore);
 
