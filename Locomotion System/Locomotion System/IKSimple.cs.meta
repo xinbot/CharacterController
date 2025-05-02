@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0c60ca42e17d749759ba46c7405c429c
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/IKSimple.cs
+  uploadId: 231224

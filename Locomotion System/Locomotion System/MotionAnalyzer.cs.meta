@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a9b90432e9e8a484484b4bb466ae6014
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/MotionAnalyzer.cs
+  uploadId: 231224

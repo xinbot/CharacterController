@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2a236c724188d43f8a22f08f075aaebc
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/IKSolver.cs
+  uploadId: 231224

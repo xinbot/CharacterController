@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1b7579caf83642c9bc96a2154a95339
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Character Controller Scripts/Follower.cs
+  uploadId: 231224

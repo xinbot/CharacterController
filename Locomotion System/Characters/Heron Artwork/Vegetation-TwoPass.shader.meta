@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: ed67ab8ecd118f12a000e6888f962b59
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Characters/Heron Artwork/Vegetation-TwoPass.shader
+  uploadId: 231224

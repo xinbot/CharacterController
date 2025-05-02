@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c769f975fc36441898bc9d416e9211b4
+timeCreated: 1519246323
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/VertexColorMaterial.mat
+  uploadId: 231224

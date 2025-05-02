@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 73e72324dce434492be622401adbed13
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/GhostOriginal.cs
+  uploadId: 231224

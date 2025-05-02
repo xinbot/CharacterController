@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 090a6c333c2224b00a3974973f81cb23
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/MotionAnalyzerBackwards.cs
+  uploadId: 231224

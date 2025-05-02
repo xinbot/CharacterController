@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d5b631f7e598a4520899062fda63e9ff
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Character Controller Scripts/AimLookCharacterController.cs
+  uploadId: 231224

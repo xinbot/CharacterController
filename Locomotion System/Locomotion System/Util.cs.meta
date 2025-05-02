@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 758fe8d830abe48e39bbe56104c51590
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Locomotion System/Util.cs
+  uploadId: 231224

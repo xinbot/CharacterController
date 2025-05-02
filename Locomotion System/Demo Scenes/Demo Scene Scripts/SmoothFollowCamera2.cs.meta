@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9203f4d32b463452eb6ae812d681eca7
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Demo Scenes/Demo Scene Scripts/SmoothFollowCamera2.cs
+  uploadId: 231224

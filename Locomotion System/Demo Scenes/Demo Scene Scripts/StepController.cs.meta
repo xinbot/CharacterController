@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69ee30638ba7a452abbc4f0b422d13ff
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Demo Scenes/Demo Scene Scripts/StepController.cs
+  uploadId: 231224

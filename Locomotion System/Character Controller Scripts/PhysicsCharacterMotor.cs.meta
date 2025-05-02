@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85bd0eecb4aca497fb6c954aa2311bee
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 7135
+  packageName: Locomotion System
+  packageVersion: 1.0.2
+  assetPath: Assets/Locomotion System Files/Character Controller Scripts/PhysicsCharacterMotor.cs
+  uploadId: 231224
