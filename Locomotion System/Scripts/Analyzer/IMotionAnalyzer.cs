@@ -33,9 +33,9 @@ public abstract class IMotionAnalyzer
 
     public abstract Vector3 cycleVelocity { get; }
 
-    public abstract Vector3 GetFlightFootPosition(int leg, float flightTime, int phase);
-
     public abstract float cycleOffset { get; set; }
+
+    public abstract Vector3 GetFlightFootPosition(int leg, float flightTime, int phase);
 
     public abstract void Analyze(GameObject o);
 }
